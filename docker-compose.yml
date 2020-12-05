@@ -1,0 +1,43 @@
+version: '3.5'
+networks:
+  app:
+   name: app_default
+services:
+  dynamodb_admin:
+    container_name: app_admin
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "4701:8001"
+    environment:
+      - DYNAMO_ENDPOINT=http://localstack:4566
+    depends_on:
+      - localstack
+    networks:
+      - app
+
+  localstack:
+    container_name: app_localstack
+    build:
+      context: ./
+      dockerfile: Dockerfile-localstack
+    ports:
+      - "4566-4599:4566-4599"
+      - "4700:80"
+    stop_grace_period: 3m
+    environment:
+      - SERVICES=sqs,lambda,apigateway,cloudwatch,logs,s3,iam,sts,ssm,dynamodb,dynamodbstreams,kinesis,firehose,events,sns
+      - LAMBDA_EXECUTOR=docker-reuse
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - ENV=dev
+      - LAMBDA_DOCKER_NETWORK=app_default
+    volumes:
+      - ~/.aws:/root/.aws
+      - ./:/app
+      # Runs init scripts in alphabetical order
+      - ./docker/localstack:/localstack_files
+      - ./docker/localstack/init:/docker-entrypoint-initaws.d
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      terrform-local.localstack: 127.0.0.1
+    networks:
+      - app

@@ -1,0 +1,11 @@
+FROM hashicorp/terraform:0.12.26 AS tf
+
+FROM localstack/localstack:0.11.4
+
+COPY --from=tf /bin/terraform /bin
+
+ENV SOMETHING_NEEDED_IN_LOCALSTACK_INIT value
+ADD ./docker/localstack/ /localstack_files
+ADD ./docker/localstack/init /docker-entrypoint-initaws.d
+
+COPY ./ /app

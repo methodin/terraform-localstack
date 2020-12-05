@@ -14,7 +14,7 @@ ARGS = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 # Terraform container
 TERRAFORM := docker run -i -t \
 		--network=my_networ \
-		--add-host terraform-local.localstack:`docker inspect -f '{{ .NetworkSettings.Networks.my_network.IPAddress }}' localstack` \
+		--add-host terraform-local.localstack:`docker inspect -f '{{ .NetworkSettings.Networks.my_network.IPAddress }}' app_localstack` \
 		-v `pwd`/terraform:/app/ \
 		-v ~/.aws:/root/.aws \
 		-e TF_LOG=ERROR \
